@@ -172,13 +172,14 @@ int32_t RBI_ConfigRFSwitch(RBI_Switch_TypeDef Config)
             break;
           }
           case RBI_SWITCH_RFO_LP:
-          {
+         {
             /*Turns On in Tx Low Power the RF Switch */
             //APP_LOG(TS_OFF, VLEVEL_M, "RF SWITCH: LP\r\n");
             HAL_GPIO_WritePin(RF_SW_CTRL1_GPIO_PORT, RF_SW_CTRL1_PIN, GPIO_PIN_SET);
             HAL_GPIO_WritePin(RF_SW_CTRL2_GPIO_PORT, RF_SW_CTRL2_PIN, GPIO_PIN_SET);
             break;
-          }
+         }
+
           case RBI_SWITCH_RFO_HP:
           {
             /*Turns On in Tx High Power the RF Switch */
