@@ -172,15 +172,14 @@ int32_t RBI_ConfigRFSwitch(RBI_Switch_TypeDef Config)
             break;
           }
           case RBI_SWITCH_RFO_LP:
-        	  /*
+
          {
             /*Turns On in Tx Low Power the RF Switch */
             //APP_LOG(TS_OFF, VLEVEL_M, "RF SWITCH: LP\r\n");
-        	  /*
             HAL_GPIO_WritePin(RF_SW_CTRL1_GPIO_PORT, RF_SW_CTRL1_PIN, GPIO_PIN_SET);
             HAL_GPIO_WritePin(RF_SW_CTRL2_GPIO_PORT, RF_SW_CTRL2_PIN, GPIO_PIN_SET);
             break;
-         } */
+         }
 
           case RBI_SWITCH_RFO_HP:
           {
@@ -216,10 +215,9 @@ int32_t RBI_GetTxConfig(void)
   return BSP_RADIO_GetTxConfig();
 #else
   /* 2/ Or implement RBI_GetTxConfig here */
-  //int32_t retcode = RBI_CONF_RFO;
+  int32_t retcode = RBI_CONF_RFO;
   /* USER CODE BEGIN RBI_GetTxConfig_2 */
 #warning user to provide its board code or to call his board driver functions
-  int32_t retcode=RBI_CONF_RFO_HP;
   /* USER CODE END RBI_GetTxConfig_2 */
   return retcode;
 #endif  /* USE_BSP_DRIVER */
@@ -311,9 +309,7 @@ int32_t RBI_GetRFOMaxPowerConfig(RBI_RFOMaxPowerConfig_TypeDef Config)
 #endif  /* USE_BSP_DRIVER  */
 }
 /* USER CODE BEGIN EF */
-int32_t RBI_GetWakeUpTime(void) {
-  return 10; // Proporciona 10ms de estabilidad al TCXO
-}
+
 /* USER CODE END EF */
 
 /* Private Functions Definition -----------------------------------------------*/

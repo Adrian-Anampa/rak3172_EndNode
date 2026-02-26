@@ -2,8 +2,7 @@
 ../LoRaWAN/Target/radio_board_if.c:59:9:RBI_Init	32	static
 ../LoRaWAN/Target/radio_board_if.c:100:9:RBI_DeInit	16	static
 ../LoRaWAN/Target/radio_board_if.c:134:9:RBI_ConfigRFSwitch	24	static
-../LoRaWAN/Target/radio_board_if.c:201:9:RBI_GetTxConfig	16	static
-../LoRaWAN/Target/radio_board_if.c:228:9:RBI_IsTCXO	16	static
-../LoRaWAN/Target/radio_board_if.c:254:9:RBI_IsDCDC	16	static
-../LoRaWAN/Target/radio_board_if.c:280:9:RBI_GetRFOMaxPowerConfig	24	static
-../LoRaWAN/Target/radio_board_if.c:314:9:RBI_GetWakeUpTime	4	static
+../LoRaWAN/Target/radio_board_if.c:200:9:RBI_GetTxConfig	16	static
+../LoRaWAN/Target/radio_board_if.c:226:9:RBI_IsTCXO	16	static
+../LoRaWAN/Target/radio_board_if.c:252:9:RBI_IsDCDC	16	static
+../LoRaWAN/Target/radio_board_if.c:278:9:RBI_GetRFOMaxPowerConfig	24	static
