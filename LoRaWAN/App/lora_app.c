@@ -290,7 +290,8 @@ static UTIL_TIMER_Time_t TxPeriodicity = APP_TX_DUTYCYCLE;
 static UTIL_TIMER_Object_t StopJoinTimer;
 
 /* USER CODE BEGIN PV */
-
+ static uint8_t AppDataBuffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE];
+ static LmHandlerAppData_t AppData = { 0 , 0, AppDataBuffer };
 /* USER CODE END PV */
 
 /* Exported functions ---------------------------------------------------------*/
@@ -383,14 +384,63 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 static void OnRxData(LmHandlerAppData_t *appData, LmHandlerRxParams_t *params)
 {
   /* USER CODE BEGIN OnRxData_1 */
-
+	uint8_t RxPort = 0;
+	if (params != NULL) {
+		if (params->IsMcpsIndication) {
+			if (appData != NULL) {
+				RxPort = appData->Port;
+				if (appData->Buffer != NULL) {
+					if (RxPort == 99) {
+						switch (appData->Buffer[0]) {
+						case 0x06:
+							//Encender/apagar LED
+							if (appData->Buffer[1] == 0x01) {
+								if (appData->Buffer[2] == 0x01) {
+									//Encendemos el LED
+									HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin,
+											GPIO_PIN_SET);
+								} else if (appData->Buffer[2] == 0x00) {
+									//Apagamos el LED
+									HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin,
+											GPIO_PIN_RESET);
+								}
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
   /* USER CODE END OnRxData_1 */
 }
 
 static void SendTxData(void)
 {
   /* USER CODE BEGIN SendTxData_1 */
+	uint16_t batteryLevel = SYS_GetBatteryLevel();
+	LmHandlerErrorStatus_t status = LORAMAC_HANDLER_ERROR;
+	UTIL_TIMER_Time_t nextTxIn = 0;
+	AppData.Port = LORAWAN_USER_APP_PORT;
+	AppData.Buffer[0] = (uint8_t) ((batteryLevel >> 8) & 0xFF);
+	AppData.Buffer[1] = (uint8_t) (batteryLevel & 0xFF);
+	AppData.BufferSize = 2;
+	status = LmHandlerSend(&AppData, LmHandlerParams.IsTxConfirmed, false);
+	if (LORAMAC_HANDLER_SUCCESS == status) {
+		APP_LOG(TS_ON, VLEVEL_L, "SEND REQUEST\r\n");
+	} else if (LORAMAC_HANDLER_DUTYCYCLE_RESTRICTED == status) {
+		nextTxIn = LmHandlerGetDutyCycleWaitTime();
+		if (nextTxIn > 0) {
+			APP_LOG(TS_ON, VLEVEL_L, "Next Tx in  : ~%d second(s)\r\n",
+					(nextTxIn / 1000));
+		}
+	}
 
+	if (EventType == TX_ON_TIMER) {
+		UTIL_TIMER_Stop(&TxTimer);
+		UTIL_TIMER_SetPeriod(&TxTimer, MAX(nextTxIn, TxPeriodicity));
+		UTIL_TIMER_Start(&TxTimer);
+	}
   /* USER CODE END SendTxData_1 */
 }
 
