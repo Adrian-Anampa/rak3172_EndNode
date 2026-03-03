@@ -22,6 +22,7 @@
 #include "dma.h"
 #include "app_lorawan.h"
 #include "rtc.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -96,6 +97,7 @@ int main(void)
   MX_RTC_Init();
   MX_USART1_UART_Init();
   MX_LoRaWAN_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */

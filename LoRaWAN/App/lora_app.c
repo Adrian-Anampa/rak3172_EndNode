@@ -36,6 +36,7 @@
 #include "flash_if.h"
 
 /* USER CODE BEGIN Includes */
+#include "dht11.h"
 
 /* USER CODE END Includes */
 
@@ -419,19 +420,57 @@ static void SendTxData(void)
 {
   /* USER CODE BEGIN SendTxData_1 */
 	uint16_t batteryLevel = SYS_GetBatteryLevel();
+	uint8_t dht_data[5]= {0};
+	uint8_t temp_entera= 0 , temp_decimal=0;
+	uint8_t hum_entera= 0 , hum_decimal=0;
+
+	extern TIM_HandleTypeDef htim2;
+	HAL_TIM_Base_Start(&htim2);
 	LmHandlerErrorStatus_t status = LORAMAC_HANDLER_ERROR;
 	UTIL_TIMER_Time_t nextTxIn = 0;
+	if(DHT11_Start()){
+			dht_data[0]=DHT11_Read(); // HUMEDAD ENTERA
+			dht_data[1]=DHT11_Read(); // HUMEDAD DECIMAL
+			dht_data[2]=DHT11_Read(); // TEMPERATURA ENTERA
+			dht_data[3]=DHT11_Read(); // TEMPERATURA DECIMAL
+			dht_data[4]=DHT11_Read(); //CHECKSUMA
+			if (dht_data[4] == ((dht_data[0] + dht_data[1] + dht_data[2] + dht_data[3]) & 0xFF))
+			      {
+			          temp_entera  = dht_data[2];
+			          temp_decimal = dht_data[3];
+			          hum_entera   = dht_data[0];
+			          hum_decimal  = dht_data[1];
+
+			          APP_LOG(TS_ON, VLEVEL_M, "DHT11 -> Temp: %d.%d C | Hum: %d.%d %%\r\n", temp_entera, temp_decimal, hum_entera, hum_decimal);
+			      }
+			      else
+			      {
+			          APP_LOG(TS_ON, VLEVEL_M, "Error: Checksum DHT11 invalido\r\n");
+			      }
+		}
+		else {
+			APP_LOG(TS_ON,VLEVEL_M,"Error: DHT11 no responde en PA6\r\n");
+		}
+	HAL_TIM_Base_Stop(&htim2);
 	AppData.Port = LORAWAN_USER_APP_PORT;
 	AppData.Buffer[0] = (uint8_t) ((batteryLevel >> 8) & 0xFF);
 	AppData.Buffer[1] = (uint8_t) (batteryLevel & 0xFF);
-	AppData.BufferSize = 2;
+	// Bytes 2 y 3: Datos de la Temperatura
+	AppData.Buffer[2] = temp_entera;
+	AppData.Buffer[3] = temp_decimal;
+
+	  // Bytes 4 y 5: Datos de la Humedad
+	AppData.Buffer[4] = hum_entera;
+	AppData.Buffer[5] = hum_decimal;
+	AppData.BufferSize = 6;
+	APP_LOG(TS_ON, VLEVEL_L, "SEND REQUEST -> ADC: %d | Temp: %d.%d | Hum: %d.%d\r\n", batteryLevel, temp_entera, temp_decimal, hum_entera, hum_decimal);
 	status = LmHandlerSend(&AppData, LmHandlerParams.IsTxConfirmed, false);
 	if (LORAMAC_HANDLER_SUCCESS == status) {
-		APP_LOG(TS_ON, VLEVEL_L, "SEND REQUEST\r\n");
+		APP_LOG(TS_ON, VLEVEL_L, "DATOS EN LA COLA DE TX \r\n");
 	} else if (LORAMAC_HANDLER_DUTYCYCLE_RESTRICTED == status) {
 		nextTxIn = LmHandlerGetDutyCycleWaitTime();
 		if (nextTxIn > 0) {
-			APP_LOG(TS_ON, VLEVEL_L, "Next Tx in  : ~%d second(s)\r\n",
+			APP_LOG(TS_ON, VLEVEL_L, "Restriccion de Red. Siguiente Tx en  : ~%d second(s)\r\n",
 					(nextTxIn / 1000));
 		}
 	}

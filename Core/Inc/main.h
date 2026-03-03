@@ -66,6 +66,8 @@ void Error_Handler(void);
 #define RF_CTRL1_GPIO_Port GPIOB
 #define EN_ESP_Pin GPIO_PIN_1
 #define EN_ESP_GPIO_Port GPIOA
+#define DHT11_PIN_Pin GPIO_PIN_6
+#define DHT11_PIN_GPIO_Port GPIOA
 #define BOTON_Pin GPIO_PIN_7
 #define BOTON_GPIO_Port GPIOA
 #define BOTON_EXTI_IRQn EXTI9_5_IRQn
